@@ -23,6 +23,7 @@ se90 = strel('line', 3, 90);
 se0 = strel('line', 3, 0);
 seD = strel('diamond',1);
 idx = 1;
+
 for row = 0:17
     % Size of bumps at the edge of image is different from inside bumps
     if(row == 0)
@@ -39,11 +40,11 @@ for row = 0:17
             
     for col = 0:17
         [row col]
-        if((row == 0 || row == 17) && (col == 0 || col == 1 || col == 17))
+        if(((row == 0 || row == 17) && (col == 0 || col == 1 || col == 17)) || (row == 17 && col == 16))
             continue;  % Dont have bump in this spot
         end
         
-        if((ismember(row,defect_row) && ismember(col, defect_col)) || (row == 17 && col == 2) )
+        if((ismember(row,defect_row) && ismember(col, defect_col)) || (row == 17 && col == 2) || (row == 17 && col == 15))
             'defect bump'
             Y(idx) = -1;
         else
@@ -93,9 +94,9 @@ for row = 0:17
 %             i = i + 1;
 %         end
        
-%         figure(2)
- %        hold on
-  %       hold off
+        figure(2)
+        hold on
+        hold off
 %         imshow(binI);
         
         % Edge detection by Canny method
@@ -114,18 +115,29 @@ for row = 0:17
         T = bumpI;
         T(A==0) = 0;
 
-        [N M P S2 K] = extract_features(T, A)
-        NA(idx) = N;
-        MA(idx) = M;
-        PA(idx) = P;
-        SA(idx) = S2;
-        KA(idx) = K;
-%        imshow(T);
+        [n m p s k] = extract_features(T, A)
+        N(idx) = n;
+        M(idx) = m;
+        P(idx) = p;
+        S(idx) = s;
+        K(idx) = k;
+        
+        X = [n m p s k];
+        z = calculate_fuzzy(X, Y(idx));
+        Z(idx) = z;
+        %imshow(T);
         %pause;
-        idx = idx + 1
+         idx = idx + 1
+%         if(row == 2 && col == 9)
+%             good_center = [n m p s k]
+%         end
+%         
+%         if (row == 6 && col == 11)
+%             defect_center = [n m p s k]
+%         end
 %         close all;
     end
 end
-T = table(NA',MA',PA',SA',KA',Y');
-writetable(T,'solderbump.xlsx');
+T = table(N',M',P',S',K',Z',Y');
+writetable(T,'solderbumpfuzzy.xlsx');
 

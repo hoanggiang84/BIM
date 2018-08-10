@@ -8,10 +8,10 @@ function [N M P S2 K] = extract_features(I, B)
 % S2 : the variance gray-value
 % K : the skewness gray-value
     [br, bc] = size(I);
-    N = 0;
+    N = double(0);
     for i = 1:br
         for j = 1:bc
-            N = N + B(i,j);
+            N = N + double(B(i,j));
         end
     end
 
@@ -23,7 +23,7 @@ function [N M P S2 K] = extract_features(I, B)
     end
     M = M/N;
 
-    P = max(I(:)) - min(I(:));
+    P = double(max(I(:))) - double(min(I(:)));
 
     S2 = double(0);
     for i = 1:br
@@ -33,7 +33,15 @@ function [N M P S2 K] = extract_features(I, B)
             end
         end
     end
-    S2 = abs(S2);
+    S2 = abs(S2/N);
 
-    K = sqrt(S2^3);
+    K = double(0);
+    for i = 1:br
+        for j = 1:bc
+            if(I(i,j) ~= 0)
+                K = K + (double(I(i,j)) - M)^3;
+            end
+        end
+    end
+    K = (K/N)^(1/3);
 end
